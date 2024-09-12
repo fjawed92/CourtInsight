@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bismillah-text">
+    ﷽
+</div>
+<br>
+<p style="text-align: center;">In the name of Allah, The Most Gracious and The Most Merciful</p>
+
+<!-- League Cards Section -->
+<div class="container mt-4">
+    <div class="row">
+        <!-- Loop through leagues and create a card for each -->
+        {% for league in leagues %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ league.name }}</h5>
+                    <p class="card-text">
+                        <!-- Display the number of teams -->
+                        <strong>Teams:</strong> {{ league.teams | length }}
+                    </p>
+                    <!-- Update the link to use the new 'select_league' route -->
+                    <a href="{{ url_for('select_league', league_id=league.id) }}" class="btn btn-primary mt-2">View {{ league.name }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
