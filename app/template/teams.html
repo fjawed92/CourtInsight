@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Teams Rankings - {{ latest_season.name }}</h2>
+    <div class="row">
+        {% for team in team_stats %}
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm rounded-lg">
+                <div class="card-body text-center p-4">
+                    <!-- Team Name with Larger Font and Light Gray Background -->
+                    <h5 class="card-title mb-3 text-uppercase font-weight-bold" style="letter-spacing: 1.2px;">{{ team['team'].teamName }}</h5>
+                    <!-- Team Stats in a Clean Layout -->
+                    <div class="d-flex justify-content-around mb-3">
+                        <div class="text-muted">
+                            <small>Wins</small>
+                            <div class="text-dark">{{ team['wins'] }}</div>
+                        </div>
+                        <div class="text-muted">
+                            <small>Losses</small>
+                            <div class="text-dark">{{ team['losses'] }}</div>
+                        </div>
+                        <div class="text-muted">
+                            <small>Rank</small>
+                            <div class="text-dark">{{ loop.index }}</div>
+                        </div>
+                    </div>
+                    <!-- Minimalistic Button -->
+                    <a href="{{ url_for('team_details', team_id=team['team'].teamID) }}" class="btn btn-outline-primary btn-sm">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
