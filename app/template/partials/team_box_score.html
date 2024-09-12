@@ -1,0 +1,22 @@
+{% for box in box_scores %}
+<tr>
+    <td class="player-name">{{ box.player.firstName[0] }}. {{ box.player.lastName }} <span>{{ box.player.jerseyNumber }}</span></td>
+    <td>{{ box.fgm }}-{{ box.fga }}</td>
+    <td>{{ box.three_fgm }}-{{ box.three_fga }}</td>
+    <td>{{ box.ftm }}-{{ box.fta }}</td>
+    <td>{{ box.oreb }}</td>
+    <td>{{ box.dreb }}</td>
+    <td>{{ box.oreb + box.dreb }}</td>
+    <td>{{ box.assists }}</td>
+    <td>{{ box.steals }}</td>
+    <td>{{ box.blocks }}</td>
+    <td>{{ box.turnovers }}</td>
+    <td>{{ box.fouls }}</td>
+    <td>{{ box.points }}</td>
+</tr>
+{% endfor %}
+<!-- Totals row -->
+<tr class="font-weight-bold">
+    <td>Total</td>
+    <td colspan="12">{{ total_points }}</td>
+</tr>
