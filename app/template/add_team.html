@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Add New Team</h1>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+
+    <p>
+        {{ form.teamName.label }}<br>
+        {{ form.teamName(size=32) }}
+    </p>
+
+    <p>
+        {{ form.teamDivision.label }}<br>
+        {{ form.teamDivision(size=32) }}
+    </p>
+
+    <p>
+        {{ form.teamCaptain.label }}<br>
+        {{ form.teamCaptain(size=32) }}
+    </p>
+
+    <p>
+        {{ form.contactnumber.label }}<br>
+        {{ form.contactnumber(size=32) }}
+    </p>
+
+    <p>
+        {{ form.contactemail.label }}<br>
+        {{ form.contactemail(size=32) }}
+    </p>
+
+    <!-- League dropdown -->
+    <p>
+        {{ form.league_id.label }}<br>
+        {{ form.league_id(class="form-control") }}
+    </p>
+
+    <p><input type="submit" value="Add Team" class="btn btn-primary"></p>
+</form>
+{% endblock %}
+
