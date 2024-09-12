@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Schedule a New Game</h2>
+    <form action="{{ url_for('schedule_game') }}" method="POST">
+
+        <!-- Select League (Readonly) -->
+        <div class="form-group">
+            <label for="league">League</label>
+            <select id="league" name="league" class="form-control" readonly>
+                <option value="{{ current_league.id }}" selected>{{ current_league.name }}</option>
+            </select>
+        </div>
+
+        <!-- Select Season -->
+        <div class="form-group">
+            <label for="season">Season</label>
+            <select id="season" name="season" class="form-control">
+                {% for season in seasons %}
+                    <option value="{{ season.id }}" {% if season.id == latest_season_id %}selected{% endif %}>{{ season.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Select Team 1 -->
+        <div class="form-group">
+            <label for="team1">Team 1</label>
+            <select id="team1" name="team1" class="form-control" required>
+                {% for team in teams %}
+                    <option value="{{ team.teamID }}">{{ team.teamName }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Select Team 2 -->
+        <div class="form-group">
+            <label for="team2">Team 2</label>
+            <select id="team2" name="team2" class="form-control" required>
+                {% for team in teams %}
+                    <option value="{{ team.teamID }}">{{ team.teamName }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Game Date -->
+        <div class="form-group">
+            <label for="game_date">Game Date</label>
+            <input type="date" id="game_date" name="game_date" class="form-control" required>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Schedule Game</button>
+    </form>
+</div>
+{% endblock %}

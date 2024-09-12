@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .table {
+        border-collapse: collapse; /* Ensure borders are handled correctly */
+    }
+
+    .table th, .table td {
+        padding: 0.3rem; /* Smaller padding */
+        font-size: 0.8rem; /* Smaller font size */
+    }
+
+    .thead-light th {
+        border-bottom: 1px solid #dee2e6; /* Border only under headers */
+    }
+
+    .table td {
+        border: none; /* No borders for table cells */
+    }
+
+    .table tr {
+        border-bottom: 1px solid #dee2e6; /* Optional: add borders between rows */
+    }
+
+    /* Box Score Table Styling */
+
+    .box-score-table {
+        margin-top: 20px;
+        width: 100%;
+        border-collapse: collapse;  /* Ensures borders and colors behave as expected */
+    }
+
+    .box-score-title {
+        margin-top: 30px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .box-score-table th {
+        background-color: #ffffff;  /* White background for header */
+        color: #000;                /* Black text for header */
+        border-top: 2px solid #dee2e6;
+        border-bottom: 2px solid #dee2e6;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .box-score-table td {
+        text-align: center;
+        padding: 8px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .box-score-table .player-name {
+        text-align: left;
+        padding-left: 10px;
+        font-weight: bold;
+    }
+
+    .box-score-table .player-name span {
+        font-size: 0.8rem;
+        font-weight: normal;
+        color: #6c757d;  /* Light gray color for jersey number */
+    }
+
+    /* Alternating row colors */
+    .box-score-table tbody tr:nth-child(odd) {
+        background-color: #ffffff;  /* White background for odd rows */
+    }
+
+    .box-score-table tbody tr:nth-child(even) {
+        background-color: #f7f7f7;  /* Very light gray background for even rows */
+    }
+
+    /* Team Scores at the Top */
+    .team-scores {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .team-score {
+        text-align: center;
+    }
+
+    .team-score h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .team-score p {
+        font-size: 1.9rem;
+        font-weight: bold;
+        color: #000;
+    }
+
+</style>
+
+<div class="container mt-4">
+    <!-- Team Scores -->
+    <div class="team-scores">
+        <div class="team-score">
+            <h2>{{ game.team1.teamName }}</h2>
+            <p>{{ team1_total_points }}</p>
+        </div>
+        <div class="team-score">
+            <h2>{{ game.team2.teamName }}</h2>
+            <p>{{ team2_total_points }}</p>
+        </div>
+    </div>
+
+    <!-- Box Score Tables -->
+    <div class="box-score-section">
+        <div class="box-score-title">{{ game.team1.teamName }} Box Score</div>
+        <table class="box-score-table">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>FGM-A</th>
+                    <th>FG%</th>
+                    <th>3PM-A</th>
+                    <th>3P%</th>
+                    <th>FTM-A</th>
+                    <th>OREB</th>
+                    <th>DREB</th>
+                    <th>REB</th>
+                    <th>AST</th>
+                    <th>STL</th>
+                    <th>BLK</th>
+                    <th>TO</th>
+                    <th>PF</th>
+                    <th>PTS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for box in team1_box_scores %}
+                    <tr>
+                        <td class="player-name">{{ box.player.firstName[0] }}. {{ box.player.lastName }} <span>{{ box.player.jerseyNumber }}</span></td>
+                        <td>{{ box.fgm }}-{{ box.fga }}</td>
+                        <td>{{ box.fg_percent }}%</td>
+                        <td>{{ box.three_fgm }}-{{ box.three_fga }}</td>
+                        <td>{{ box.three_fg_percent }}%</td>
+                        <td>{{ box.ftm }}-{{ box.fta }}</td>
+                        <td>{{ box.oreb }}</td>
+                        <td>{{ box.dreb }}</td>
+                        <td>{{ box.oreb + box.dreb }}</td>
+                        <td>{{ box.assists }}</td>
+                        <td>{{ box.steals }}</td>
+                        <td>{{ box.blocks }}</td>
+                        <td>{{ box.turnovers }}</td>
+                        <td>{{ box.fouls }}</td>
+                        <td>{{ box.points }}</td>
+                    </tr>
+                {% endfor %}
+                <!-- Totals Row -->
+                <tr class="font-weight-bold">
+                    <td>Total</td>
+                    <td>{{ team1_totals.fgm }}-{{ team1_totals.fga }}</td>
+                    <td>{{ team1_totals.fg_percent }}%</td>
+                    <td>{{ team1_totals.three_fgm }}-{{ team1_totals.three_fga }}</td>
+                    <td>{{ team1_totals.three_fg_percent }}%</td>
+                    <td>{{ team1_totals.ftm }}-{{ team1_totals.fta }}</td>
+                    <td>{{ team1_totals.oreb }}</td>
+                    <td>{{ team1_totals.dreb }}</td>
+                    <td>{{ team1_totals.reb }}</td>
+                    <td>{{ team1_totals.ast }}</td>
+                    <td>{{ team1_totals.stl }}</td>
+                    <td>{{ team1_totals.blk }}</td>
+                    <td>{{ team1_totals.to }}</td>
+                    <td>{{ team1_totals.pf }}</td>
+                    <td>{{ team1_totals.pts }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Box Score Table for Team 2 -->
+    <div class="box-score-section">
+        <div class="box-score-title">{{ game.team2.teamName }} Box Score</div>
+        <table class="box-score-table">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>FGM-A</th>
+                    <th>FG%</th>
+                    <th>3PM-A</th>
+                    <th>3P%</th>
+                    <th>FTM-A</th>
+                    <th>OREB</th>
+                    <th>DREB</th>
+                    <th>REB</th>
+                    <th>AST</th>
+                    <th>STL</th>
+                    <th>BLK</th>
+                    <th>TO</th>
+                    <th>PF</th>
+                    <th>PTS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for box in team2_box_scores %}
+                    <tr>
+                        <td class="player-name">{{ box.player.firstName[0] }}. {{ box.player.lastName }} <span>{{ box.player.jerseyNumber }}</span></td>
+                        <td>{{ box.fgm }}-{{ box.fga }}</td>
+                        <td>{{ box.fg_percent }}%</td>
+                        <td>{{ box.three_fgm }}-{{ box.three_fga }}</td>
+                        <td>{{ box.three_fg_percent }}%</td>
+                        <td>{{ box.ftm }}-{{ box.fta }}</td>
+                        <td>{{ box.oreb }}</td>
+                        <td>{{ box.dreb }}</td>
+                        <td>{{ box.oreb + box.dreb }}</td>
+                        <td>{{ box.assists }}</td>
+                        <td>{{ box.steals }}</td>
+                        <td>{{ box.blocks }}</td>
+                        <td>{{ box.turnovers }}</td>
+                        <td>{{ box.fouls }}</td>
+                        <td>{{ box.points }}</td>
+                    </tr>
+                {% endfor %}
+                <!-- Totals Row -->
+                <tr class="font-weight-bold">
+                    <td>Total</td>
+                    <td>{{ team2_totals.fgm }}-{{ team2_totals.fga }}</td>
+                    <td>{{ team2_totals.fg_percent }}%</td>
+                    <td>{{ team2_totals.three_fgm }}-{{ team2_totals.three_fga }}</td>
+                    <td>{{ team2_totals.three_fg_percent }}%</td>
+                    <td>{{ team2_totals.ftm }}-{{ team2_totals.fta }}</td>
+                    <td>{{ team2_totals.oreb }}</td>
+                    <td>{{ team2_totals.dreb }}</td>
+                    <td>{{ team2_totals.reb }}</td>
+                    <td>{{ team2_totals.ast }}</td>
+                    <td>{{ team2_totals.stl }}</td>
+                    <td>{{ team2_totals.blk }}</td>
+                    <td>{{ team2_totals.to }}</td>
+                    <td>{{ team2_totals.pf }}</td>
+                    <td>{{ team2_totals.pts }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Last 10 Game Log Entries -->
+    <div class="mt-4">
+        <h5>Recent Game Log Entries</h5>
+        <table class="table table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th>Current Timer</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in last_entries %}
+                    <tr>
+                        <td>{{ entry.currenttimer }}</td>
+                        <td>{{ entry.actiondesc }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

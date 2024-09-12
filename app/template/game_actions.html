@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .table {
+        border-collapse: collapse; /* Ensure borders are handled correctly */
+    }
+
+    .table th, .table td {
+        padding: 0.3rem; /* Smaller padding */
+        font-size: 0.8rem; /* Smaller font size */
+    }
+
+    .thead-light th {
+        border-bottom: 1px solid #dee2e6; /* Border only under headers */
+    }
+
+    .table td {
+        border: none; /* No borders for table cells */
+    }
+
+    .table tr {
+        border-bottom: 1px solid #dee2e6; /* Optional: add borders between rows */
+    }
+
+    /* Highlight the selected player button */
+    .player-button.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Box Score Table Styling */
+    .box-score-table {
+        margin-top: 20px;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .box-score-title {
+        margin-top: 20px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .team-points {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #000;
+        margin-bottom: 15px;
+    }
+
+    .box-score-table th {
+        background-color: #ffffff;
+        color: #000;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .box-score-table td {
+        text-align: center;
+        padding: 8px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .box-score-table .player-name {
+        text-align: left;
+        padding-left: 10px;
+        font-weight: bold;
+    }
+
+    /* Alternating row colors */
+    .box-score-table tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+
+    .box-score-table tbody tr:nth-child(even) {
+        background-color: #f7f7f7;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Left Column: Team 1 Name and Players -->
+        <div class="col-12 col-md-4 border rounded p-3 text-center">
+            <h4>{{ game.team1.teamName }}</h4>
+            <div class="team-points" id="team1-total-points">{{ team1_total_points }}</div>
+            <div class="list-group">
+                {% for player in team1_players %}
+                    <button type="button" class="list-group-item list-group-item-action player-button"
+                            data-player-id="{{ player.playerID }}"
+                            data-team-id="{{ game.team_1_id }}"
+                            data-player-name="{{ player.firstName }} {{ player.lastName }}">
+                        {{ player.jerseyNumber }} - {{ player.firstName }} {{ player.lastName }}
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Middle Column: Timer and Buttons -->
+        <div class="col-12 col-md-4 border rounded p-3 shadow">
+            <!-- Timer Box -->
+            <div class="border-bottom mb-3">
+                <div id="timer" class="mb-2 text-center font-weight-bold h1">00:00:00</div>
+                <div class="d-flex justify-content-center mb-2">
+                    <button id="startTimer" class="btn btn-success mr-2">Start</button>
+                    <button id="pauseTimer" class="btn btn-warning ml-2">Pause</button>
+                    <button id="stopTimer" class="btn btn-danger ml-2">Reset</button>
+                </div>
+            </div>
+
+            <!-- Game Actions Box -->
+            <div class="d-flex flex-wrap justify-content-center border-bottom pb-3">
+                <button class="btn btn-primary m-1 btn-sm" onclick="logAction('Game Action', '2-Point Made', `${selectedPlayerName} made a 2-point shot`, selectedTeamId, selectedPlayerId); resetSelection();">2-Point Made</button>
+                <button class="btn btn-secondary m-1 btn-sm" onclick="logAction('Game Action', '2-Point Miss', `${selectedPlayerName} missed a 2-point shot`, selectedTeamId, selectedPlayerId); resetSelection();">2-Point Miss</button>
+                <button class="btn btn-primary m-1 btn-sm" onclick="logAction('Game Action', '3-Point Made', `${selectedPlayerName} made a 3-point shot`, selectedTeamId, selectedPlayerId); resetSelection();">3-Point Made</button>
+                <button class="btn btn-secondary m-1 btn-sm" onclick="logAction('Game Action', '3-Point Miss', `${selectedPlayerName} missed a 3-point shot`, selectedTeamId, selectedPlayerId); resetSelection();">3-Point Miss</button>
+                <button class="btn btn-primary m-1 btn-sm" onclick="logAction('Game Action', 'FT Made', `${selectedPlayerName} made a free throw`, selectedTeamId, selectedPlayerId); resetSelection();">FT Made</button>
+                <button class="btn btn-secondary m-1 btn-sm" onclick="logAction('Game Action', 'FT Miss', `${selectedPlayerName} missed a free throw`, selectedTeamId, selectedPlayerId); resetSelection();">FT Miss</button>
+                <button class="btn btn-warning m-1 btn-sm" onclick="logAction('Game Action', 'Foul', `${selectedPlayerName} committed a foul`, selectedTeamId, selectedPlayerId); resetSelection();">Foul</button>
+                <button class="btn btn-info m-1 btn-sm" onclick="logAction('Game Action', 'Steal', `${selectedPlayerName} made a steal`, selectedTeamId, selectedPlayerId); resetSelection();">Steal</button>
+                <button class="btn btn-success m-1 btn-sm" onclick="logAction('Game Action', 'Assist', `${selectedPlayerName} made an assist`, selectedTeamId, selectedPlayerId); resetSelection();">Assist</button>
+                <button class="btn btn-danger m-1 btn-sm" onclick="logAction('Game Action', 'Turnover', `${selectedPlayerName} caused a turnover`, selectedTeamId, selectedPlayerId); resetSelection();">Turnover</button>
+                <button class="btn btn-warning m-1 btn-sm" onclick="logAction('Game Action', 'Offensive Rebound', `${selectedPlayerName} grabbed an offensive rebound`, selectedTeamId, selectedPlayerId); resetSelection();">Offensive Rebound</button>
+                <button class="btn btn-info m-1 btn-sm" onclick="logAction('Game Action', 'Defensive Rebound', `${selectedPlayerName} grabbed a defensive rebound`, selectedTeamId, selectedPlayerId); resetSelection();">Defensive Rebound</button>
+            </div>
+
+            <!-- End Game Box -->
+            <div class="text-center mt-3">
+                <button id="endGameButton" class="btn btn-dark mt-3 btn-sm">End Game</button>
+            </div>
+        </div>
+
+        <!-- Right Column: Team 2 Name and Players -->
+        <div class="col-12 col-md-4 border rounded p-3 text-center">
+            <h4>{{ game.team2.teamName }}</h4>
+             <div class="team-points" id="team2-total-points">{{ team2_total_points }}</div>
+            <div class="list-group">
+                {% for player in team2_players %}
+                    <button type="button" class="list-group-item list-group-item-action player-button"
+                            data-player-id="{{ player.playerID }}"
+                            data-team-id="{{ game.team_2_id }}"
+                            data-player-name="{{ player.firstName }} {{ player.lastName }}">
+                        {{ player.jerseyNumber }} - {{ player.firstName }} {{ player.lastName }}
+                    </button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Team 1 Box Score -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <div class="box-score-title">{{ game.team1.teamName }}</div>
+            <table class="box-score-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>FGM-A</th>
+                        <th>3PM-A</th>
+                        <th>FTM-A</th>
+                        <th>OREB</th>
+                        <th>DREB</th>
+                        <th>REB</th>
+                        <th>AST</th>
+                        <th>STL</th>
+                        <th>BLK</th>
+                        <th>TO</th>
+                        <th>PF</th>
+                        <th>PTS</th>
+                    </tr>
+                </thead>
+                <tbody id="team1-box-score">
+                    {% for box in team1_box_scores %}
+                        <tr>
+                            <td class="player-name">{{ box.player.firstName[0] }}. {{ box.player.lastName }} <span>{{ box.player.jerseyNumber }}</span></td>
+                            <td>{{ box.fgm }}-{{ box.fga }}</td>
+                            <td>{{ box.three_fgm }}-{{ box.three_fga }}</td>
+                            <td>{{ box.ftm }}-{{ box.fta }}</td>
+                            <td>{{ box.oreb }}</td>
+                            <td>{{ box.dreb }}</td>
+                            <td>{{ box.oreb + box.dreb }}</td>
+                            <td>{{ box.assists }}</td>
+                            <td>{{ box.steals }}</td>
+                            <td>{{ box.blocks }}</td>
+                            <td>{{ box.turnovers }}</td>
+                            <td>{{ box.fouls }}</td>
+                            <td>{{ box.points }}</td>
+                        </tr>
+                    {% endfor %}
+                    <!-- Total Row -->
+                    <tr class="font-weight-bold">
+                        <td>Total</td>
+                        <td colspan="12">{{ team1_total_points }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Team 2 Box Score -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <div class="box-score-title">{{ game.team2.teamName }}</div>
+            <table class="box-score-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>FGM-A</th>
+                        <th>3PM-A</th>
+                        <th>FTM-A</th>
+                        <th>OREB</th>
+                        <th>DREB</th>
+                        <th>REB</th>
+                        <th>AST</th>
+                        <th>STL</th>
+                        <th>BLK</th>
+                        <th>TO</th>
+                        <th>PF</th>
+                        <th>PTS</th>
+                    </tr>
+                </thead>
+                <tbody id="team2-box-score">
+                    {% for box in team2_box_scores %}
+                        <tr>
+                            <td class="player-name">{{ box.player.firstName[0] }}. {{ box.player.lastName }} <span>{{ box.player.jerseyNumber }}</span></td>
+                            <td>{{ box.fgm }}-{{ box.fga }}</td>
+                            <td>{{ box.three_fgm }}-{{ box.three_fga }}</td>
+                            <td>{{ box.ftm }}-{{ box.fta }}</td>
+                            <td>{{ box.oreb }}</td>
+                            <td>{{ box.dreb }}</td>
+                            <td>{{ box.oreb + box.dreb }}</td>
+                            <td>{{ box.assists }}</td>
+                            <td>{{ box.steals }}</td>
+                            <td>{{ box.blocks }}</td>
+                            <td>{{ box.turnovers }}</td>
+                            <td>{{ box.fouls }}</td>
+                            <td>{{ box.points }}</td>
+                        </tr>
+                    {% endfor %}
+                    <!-- Total Row -->
+                    <tr class="font-weight-bold">
+                        <td>Total</td>
+                        <td colspan="12">{{ team2_total_points }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Timer and Logging Script -->
+<script>
+    let timerInterval;
+    const timerElement = document.getElementById('timer');
+    const startTimerButton = document.getElementById('startTimer');
+    const pauseTimerButton = document.getElementById('pauseTimer');
+    const stopTimerButton = document.getElementById('stopTimer');  // New Stop Button Reference
+    const endGameButton = document.getElementById('endGameButton');  // New End Game Button Reference
+    let startTime, elapsedTime = 0;
+    let isRunning = false;
+    let selectedPlayerId = null;
+    let selectedTeamId = null;
+    let selectedPlayerName = null;
+
+    // Retrieve saved timer state from localStorage
+    function retrieveTimerState() {
+        const savedStartTime = localStorage.getItem('startTime');
+        const savedElapsedTime = parseInt(localStorage.getItem('elapsedTime'), 10);
+        const timerRunning = localStorage.getItem('isRunning') === 'true';
+
+        if (savedStartTime) {
+            startTime = parseInt(savedStartTime, 10);
+            elapsedTime = savedElapsedTime || 0;
+            isRunning = timerRunning;
+
+            if (isRunning) {
+                // If timer was running, calculate elapsed time correctly
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+        }
+    }
+
+    function resetSelection() {
+        selectedPlayerId = null;
+        selectedTeamId = null;
+        selectedPlayerName = null;
+
+        // Optional: Remove the active class from all player buttons
+        document.querySelectorAll('.player-button').forEach(btn => btn.classList.remove('active'));
+
+        console.log('Selection reset');
+    }
+
+    // Handle player button clicks
+    document.querySelectorAll('.player-button').forEach(button => {
+        button.addEventListener('click', () => {
+            selectedPlayerId = button.getAttribute('data-player-id');
+            selectedTeamId = button.getAttribute('data-team-id');
+            selectedPlayerName = button.getAttribute('data-player-name');
+
+            // Optional: Add visual feedback to indicate the selected player
+            document.querySelectorAll('.player-button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        });
+    });
+
+    function updateTimer() {
+        const currentTime = new Date().getTime();
+        const timeDiff = currentTime - startTime + elapsedTime;
+        const hours = Math.floor(timeDiff / 3600000);
+        const minutes = Math.floor((timeDiff % 3600000) / 60000);
+        const seconds = Math.floor((timeDiff % 60000) / 1000);
+
+        timerElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function logAction(actionType, action, actionDesc, teamId = null, playerId = null) {
+        const currentTimer = timerElement.textContent;
+        const game_id = "{{ game.game_id }}";
+
+        console.log("Logging action:", { actionType, action, actionDesc, currentTimer, teamId, playerId }); // Log to console
+
+        // Call the generalized update_boxscore route
+        fetch('/update_boxscore', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                game_id: game_id,
+                team_id: teamId,
+                player_id: playerId,
+                action: action
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'error') {
+                console.error('Error updating BoxScore:', data.message);
+            } else {
+                console.log('BoxScore updated successfully:', data);
+                // Refresh the box scores
+                refreshBoxScores();
+            }
+        })
+        .catch(error => console.error('Fetch error:', error));
+
+        // Log the action
+        fetch('/log_action', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                gameid: game_id,
+                teamid: teamId,
+                playerid: playerId,
+                actiontype: actionType,
+                action: action,
+                actiondesc: actionDesc,
+                currenttimer: currentTimer
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'error') {
+                console.error('Error logging action:', data.message);
+            } else {
+                console.log('Action logged successfully:', data);
+            }
+        })
+        .catch(error => console.error('Fetch error:', error));
+    }
+
+    function refreshBoxScores() {
+        const game_id = "{{ game.game_id }}";
+        fetch(`/refresh_box_scores/${game_id}`)
+            .then(response => response.json())
+            .then(data => {
+                // Update Team 1 Box Score
+                document.getElementById('team1-box-score').innerHTML = data.team1_html;
+                document.getElementById('team1-total-points').textContent = data.team1_total_points;
+                // Update Team 2 Box Score
+                document.getElementById('team2-box-score').innerHTML = data.team2_html;
+                document.getElementById('team2-total-points').textContent = data.team2_total_points;
+            })
+            .catch(error => console.error('Error refreshing box scores:', error));
+    }
+
+    startTimerButton.addEventListener('click', () => {
+        if (!isRunning) {
+            startTime = new Date().getTime();
+            localStorage.setItem('startTime', startTime);
+            localStorage.setItem('isRunning', 'true');
+            timerInterval = setInterval(updateTimer, 1000);
+            logAction('Timer', 'Start Timer', 'Timer was started');
+            isRunning = true;
+        }
+    });
+
+    pauseTimerButton.addEventListener('click', () => {
+        if (isRunning) {
+            clearInterval(timerInterval);
+            elapsedTime += new Date().getTime() - startTime;
+            localStorage.setItem('elapsedTime', elapsedTime);
+            localStorage.setItem('isRunning', 'false');
+            logAction('Timer', 'Pause Timer', 'Timer was paused');
+            isRunning = false;
+        }
+    });
+
+    stopTimerButton.addEventListener('click', () => {
+        if (isRunning || elapsedTime > 0) {
+            clearInterval(timerInterval);
+            timerElement.textContent = "00:00:00";
+            startTime = null;
+            elapsedTime = 0;
+            isRunning = false;
+
+            // Clear local storage
+            localStorage.removeItem('startTime');
+            localStorage.removeItem('elapsedTime');
+            localStorage.setItem('isRunning', 'false');
+
+            logAction('Timer', 'Stop Timer', 'Timer was stopped and reset');
+        }
+    });
+
+    endGameButton.addEventListener('click', () => {
+        const game_id = "{{ game.game_id }}";
+
+        if (confirm("Are you sure you want to end the game? This action cannot be undone.")) {
+            fetch('/end_game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    game_id: game_id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Game ended successfully.');
+                    // Optionally, redirect or update the page
+                    window.location.href = `/game_summary/${game_id}`;
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while ending the game.');
+            });
+        }
+    });
+
+    // Initialize timer state on page load
+    window.addEventListener('load', retrieveTimerState);
+</script>
+{% endblock %}

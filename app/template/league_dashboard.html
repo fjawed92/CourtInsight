@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4" style="font-family: Bebas Neue; font-size: 2rem;">{{ league.name }}</h2>
+
+    <!-- Season Filter Form -->
+    <div class="text-center mb-4">
+        <form method="GET" action="{{ url_for('league_dashboard', league_id=league.id) }}" class="d-inline-block">
+            <select name="season_id" class="form-control form-control-lg mx-2" onchange="this.form.submit()">
+                <option value="">Select Season</option>
+                {% for season in seasons %}
+                <option value="{{ season.id }}" {% if season.id == selected_season_id %}selected{% endif %}>{{ season.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div class="row">
+        <!-- Last Game Result Card -->
+        {% if last_game %}
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm rounded-lg">
+                <div class="card-body p-4 text-center">
+                    <h5 class="card-title text-uppercase mb-3">Last Game Played</h5>
+                    <p class="card-text mb-2">
+                        {{ last_game.team1.teamName }} <strong>{{ last_game.team_1_score }}</strong> vs <strong>{{ last_game.team_2_score }}</strong> {{ last_game.team2.teamName }}
+                    </p>
+                    <p class="card-text mb-3">
+                        <strong>Winner:</strong> {{ last_game.winning_team.teamName }}
+                    </p>
+                    <!-- MVP Section -->
+                    {% if mvp %}
+                    <div class="mb-3">
+                        <h6 class="mt-4 text-muted">MVP: {{ mvp.firstName }} {{ mvp.lastName }}</h6>
+                        <p>{{ mvp.teamName }} - Points: <strong>{{ mvp.total_points }}</strong></p>
+                    </div>
+                    {% endif %}
+                    <a href="{{ url_for('game_summary', game_id=last_game.game_id) }}" class="btn btn-outline-primary btn-sm">View Game Summary</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="col-12 text-center">No games have been played yet.</p>
+        {% endif %}
+
+        <!-- Team Standings Card -->
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm rounded-lg">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-center mb-3">Current Team Standings</h5>
+                    <table class="table table-borderless text-center">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Team</th>
+                                <th>Wins</th>
+                                <th>Losses</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in team_standings %}
+                            <tr>
+                                <td>{{ team.rank }}</td>
+                                <td>{{ team.teamName }}</td>
+                                <td>{{ team.wins }}</td>
+                                <td>{{ team.losses }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top 5 Scorers Card -->
+    <div class="row">
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm rounded-lg">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-center mb-3">Top 5 Scorers</h5>
+                    <!-- Add a table-responsive wrapper around the table -->
+                    <div class="table-responsive">
+                        <table class="table table-borderless text-center" style="font-size: 0.8rem;">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player</th>
+                                    <th>Team</th>
+                                    <th>Points</th>
+                                    <th>FG%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for scorer in top_scorers %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ scorer.firstName }} {{ scorer.lastName }}</td>
+                                    <td>{{ scorer.teamName }}</td>
+                                    <td>{{ scorer.total_points }}</td>
+                                    <td>{{ "%.2f"|format(scorer.fg_percentage) }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional Upcoming Games Section -->
+    {% if upcoming_games %}
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm rounded-lg">
+                <div class="card-body p-4 text-center">
+                    <h5 class="card-title mb-3">Upcoming Games</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for game in upcoming_games %}
+                        <li class="list-group-item">
+                            {{ game.game_date }}: {{ game.team1.teamName }} vs {{ game.team2.teamName }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

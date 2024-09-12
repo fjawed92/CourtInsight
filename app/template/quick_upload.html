@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.form-box {
+    background-color: #ffffff; /* White background */
+    border: 1px solid #dee2e6; /* Light border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    max-width: 600px; /* Maximum width of the form */
+    margin: 0 auto; /* Center the form */
+}
+
+.form-group {
+    margin-bottom: 15px; /* Space between fields */
+}
+
+.form-label {
+    font-weight: bold; /* Bold labels */
+    margin-bottom: 5px; /* Space below labels */
+}
+
+.form-control {
+    border-radius: 4px; /* Rounded input fields */
+    padding: 10px; /* Padding inside input fields */
+    border: 1px solid #ced4da; /* Light border for input fields */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Slight inner shadow */
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+h2 {
+    color: #007bff; /* Optional: Blue heading color */
+}
+
+h5 {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+</style>
+
+<div class="container mt-4">
+    <div class="form-box shadow p-4 rounded">
+        <h2 class="text-center mb-4">Upload Team and Players</h2>
+        <form method="POST" action="{{ url_for('quick_upload') }}">
+            {{ form.hidden_tag() }}
+
+            <!-- Input for Team Name -->
+            <div class="form-group">
+                {{ form.teamName.label(class="form-label") }}
+                {{ form.teamName(class="form-control") }}
+            </div>
+
+            <!-- Player Information Input Rows -->
+            <h5>Enter Player First Name, Last Name and Jersey Numbers</h5>
+
+            {% for i in range(10) %}
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="firstName{{ i }}" placeholder="First Name">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="lastName{{ i }}" placeholder="Last Name">
+                </div>
+                <div class="col-md-4">
+                    <input type="number" class="form-control" name="jerseyNumber{{ i }}" placeholder="Jersey Number">
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Submit Button -->
+            <div class="form-group mt-3 text-center">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

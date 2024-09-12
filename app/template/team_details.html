@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Team Header -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2>{{ team.teamName }}</h2>
+            <p class="lead">
+                Record: {{ current_record }} (Rank: {{ current_rank }})
+            </p>
+        </div>
+    </div>
+
+    <!-- Combo Chart for the Last 3 Games -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <canvas id="comboChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Player Stats Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Player Average Stats - {{ latest_season.name }}</h5>
+                    <div class="table-responsive">
+                        <table class="table table-borderless text-center" style="font-size: 0.9rem;">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Player</th>
+                                    <th>Avg Points</th>
+                                    <th>FG%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for player in player_stats %}
+                                <tr>
+                                    <td>{{ player.firstName }} {{ player.lastName }} <small>{{ player.jersey_number }}</small></td>
+                                    <td>{{ "%.2f"|format(player.avg_points) }}</td>
+                                    <td>{{ "%.2f"|format(player.fg_percentage) }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Games History Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Games History - {{ latest_season.name }}</h5>
+                    <div class="table-responsive">
+                        <table class="table table-borderless text-center" style="font-size: 0.9rem;">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Opponent</th>
+                                    <th>Score</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for game in games_history %}
+                                <tr onclick="window.location.href='{{ url_for('game_summary', game_id=game.game_id) }}'" style="cursor: pointer;">
+                                    <td>{{ game.date_played }}</td>
+                                    <td>{{ game.opponent }}</td>
+                                    <td>{{ game.team_score }} - {{ game.opponent_score }}</td>
+                                    <td>{{ game.result }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Prepare the data for the chart
+const gameDates = {{ game_dates | tojson }};
+const points = {{ points | tojson }};
+const fgPercentages = {{ fg_percentages | tojson }};
+
+// Create the combo chart
+const ctx = document.getElementById('comboChart').getContext('2d');
+const comboChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: gameDates,
+        datasets: [
+            {
+                label: 'Total Points Scored',
+                data: points,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Light blue color
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                type: 'bar'
+            },
+            {
+                label: 'Field Goal Percentage',
+                data: fgPercentages,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light red color
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                type: 'line',
+                yAxisID: 'y-axis-fg'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            },
+            'y-axis-fg': {
+                type: 'linear',
+                position: 'right',
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
