@@ -1,0 +1,33 @@
+<!-- app/templates/players.html -->
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2>Players</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>'
+                    <th>Jersey Number</th>
+                    <th>Team</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                <tr>
+                    <td>{{ player.firstName }}</td>
+                    <td>{{ player.lastName }}</td>
+                    <td>{{ player.jerseyNumber }}</td>
+                    <td>{{ player.team.teamName if player.team else 'No Team' }}</td>
+                    <td>
+                        <a href="{{ url_for('update_player', player_id=player.playerID) }}" class="btn btn-sm btn-primary">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
