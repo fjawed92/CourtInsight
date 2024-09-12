@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Scheduled Games Section -->
+    <h2>Scheduled Games</h2>
+    <ul class="list-group">
+        {% for game in scheduled_games %}
+            <li class="list-group-item">
+                {{ game.game_date }}: {{ game.team1.teamName }} vs {{ game.team2.teamName }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Ongoing Games Section -->
+    <h2 class="mt-4">Ongoing Games</h2>
+    <ul class="list-group">
+        {% for game in ongoing_games %}
+            <li class="list-group-item">
+                <a href="{{ url_for('game_summary', game_id=game.game_id) }}">
+                    {{ game.game_date }}: {{ game.team1.teamName }} vs {{ game.team2.teamName }} 
+                    - Current Score: {{ game.team_1_score }} - {{ game.team_2_score }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Completed Games Section -->
+    <h2 class="mt-4">Completed Games</h2>
+    <ul class="list-group">
+        {% for game in completed_games %}
+            <li class="list-group-item">
+                <a href="{{ url_for('game_summary', game_id=game.game_id) }}">
+                    {{ game.game_date }}: {{ game.team1.teamName }} vs {{ game.team2.teamName }} 
+                    - Winner: {{ game.winning_team.teamName }} ({{ game.team_1_score }} - {{ game.team_2_score }})
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
