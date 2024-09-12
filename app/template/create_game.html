@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Create or Select a Game</h2>
+
+    <!-- Game Date Selection -->
+    <form method="POST" action="{{ url_for('create_game') }}">
+        {{ form.hidden_tag() }}
+
+        <!-- Select League -->
+        <div class="form-group">
+            {{ form.league.label(class="form-label") }}
+            {{ form.league(class="form-control", readonly=True) }}  <!-- Readonly since pre-selected -->
+        </div>
+
+        <!-- Select Season -->
+        <div class="form-group">
+            {{ form.season.label(class="form-label") }}
+            {{ form.season(class="form-control") }}
+        </div>
+
+        <!-- Game Date -->
+        <div class="form-group">
+            {{ form.gameDate.label(class="form-label") }}
+            {{ form.gameDate(class="form-control") }}
+        </div>
+
+        <!-- Select a Scheduled Game -->
+        <div class="form-group">
+            <label for="scheduled_game" class="form-label">Select a Scheduled Game</label>
+            <select id="scheduled_game" name="scheduled_game" class="form-control">
+                <option value="">Select a game...</option>
+                {% for game in scheduled_games %}
+                    <option value="{{ game.game_id }}">{{ game.team1.teamName }} vs. {{ game.team2.teamName }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <hr>
+
+        <!-- Create a New Game Manually -->
+        <h3 class="text-center">Or Create a New Game</h3>
+
+        <div class="form-group text-center">
+            {{ form.team1.label(class="form-label") }}
+            {{ form.team1(class="form-control d-inline-block w-auto") }}
+            <span class="mx-3">vs.</span>
+            {{ form.team2.label(class="form-label") }}
+            {{ form.team2(class="form-control d-inline-block w-auto") }}
+        </div>
+
+        <!-- Start Game Button -->
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary">Start Game</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
